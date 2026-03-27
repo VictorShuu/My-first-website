@@ -1,0 +1,132 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat & Mouse: The Hunt</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+            color: #00ff00;
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            cursor: crosshair;
+        }
+
+        .sprite {
+            position: absolute;
+            font-size: 3rem;
+            user-select: none;
+            transition: transform 0.1s ease;
+        }
+
+        #cat {
+            z-index: 10;
+        }
+
+        #mouse {
+            z-index: 5;
+            transition: all 0.2s ease-out;
+        }
+
+        #score-board {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px #000;
+        }
+
+        .blood-splat {
+            position: absolute;
+            font-size: 2rem;
+            pointer-events: none;
+            animation: fadeOut 1s forwards;
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(2); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="score-board">MICE CAUGHT: <span id="count">0</span></div>
+        <div id="cat" class="sprite">🐈</div>
+        <div id="mouse" class="sprite">Status: 🐭</div>
+    </div>
+
+    <script>
+        const cat = document.getElementById('cat');
+        const mouse = document.getElementById('mouse');
+        const countDisplay = document.getElementById('count');
+        const container = document.getElementById('game-container');
+        
+        let score = 0;
+        let mouseX = Math.random() * window.innerWidth;
+        let mouseY = Math.random() * window.innerHeight;
+
+        // Move the cat with the mouse/cursor
+        window.addEventListener('mousemove', (e) => {
+            cat.style.left = (e.clientX - 25) + 'px';
+            cat.style.top = (e.clientY - 25) + 'px';
+            checkCollision(e.clientX, e.clientY);
+        });
+
+        // Move the mouse away or to a new spot
+        function respawnMouse() {
+            mouseX = Math.random() * (window.innerWidth - 50);
+            mouseY = Math.random() * (window.innerHeight - 50);
+            mouse.style.left = mouseX + 'px';
+            mouse.style.top = mouseY + 'px';
+            mouse.innerText = '🐭';
+        }
+
+        function checkCollision(cx, cy) {
+            const dx = cx - mouseX;
+            const dy = cy - mouseY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // If the cat touches the mouse
+            if (distance < 50) {
+                catchMouse(mouseX, mouseY);
+            }
+        }
+
+        function catchMouse(x, y) {
+            score++;
+            countDisplay.innerText = score;
+            
+            // Show "capture" effect
+            mouse.innerText = '💥';
+            
+            // Create a small visual "splat"
+            const splat = document.createElement('div');
+            splat.className = 'blood-splat';
+            splat.style.left = x + 'px';
+            splat.style.top = y + 'px';
+            splat.innerText = '🩸';
+            container.appendChild(splat);
+            
+            // Remove splat after animation
+            setTimeout(() => splat.remove(), 1000);
+
+            // Move mouse to a new location instantly
+            respawnMouse();
+        }
+
+        // Initial position
+        respawnMouse();
+    </script>
+</body>
+</html>
